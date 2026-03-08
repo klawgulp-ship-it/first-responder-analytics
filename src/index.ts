@@ -22,9 +22,9 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disabled for dashboard SPA
 }));
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.ALLOWED_ORIGINS?.split(',')
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
+  origin: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : true,
   credentials: true,
 }));
 
@@ -76,7 +76,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔══════════════════════════════════════════════════╗
 ║   First Responder Analytics Platform v1.0.0      ║

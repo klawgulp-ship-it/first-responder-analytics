@@ -4,7 +4,7 @@
   "description": "First Responder Analytics Platform — AI-powered incident management and resource optimization",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cd dashboard && npm install && npm run build",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "migrate": "ts-node src/db/migrate.ts",
     "seed": "ts-node src/db/seeds/seed.ts",
