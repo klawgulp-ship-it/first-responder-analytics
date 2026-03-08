@@ -1,28 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { api } from './services/api';
+import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import './styles.css';
 
+type View = 'landing' | 'login' | 'dashboard';
+
 export default function App() {
   const [authenticated, setAuthenticated] = useState(api.isAuthenticated());
   const [user, setUser] = useState<any>(null);
+  const [view, setView] = useState<View>(api.isAuthenticated() ? 'dashboard' : 'landing');
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
 
   const handleLogin = useCallback(async (username: string, password: string) => {
     const data = await api.login(username, password);
     setUser(data.user);
     setAuthenticated(true);
+    setView('dashboard');
   }, []);
 
   const handleLogout = useCallback(() => {
     api.logout();
     setAuthenticated(false);
     setUser(null);
+    setView('landing');
   }, []);
 
+  if (view === 'landing' && !authenticated) {
+    return <LandingPage onNavigateToLogin={() => setView('login')} />;
+  }
+
   if (!authenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage onLogin={handleLogin} onBack={() => setView('landing')} />;
   }
 
   return (
@@ -34,10 +44,10 @@ export default function App() {
         </div>
         <ul className="nav-links">
           {[
-            { id: 'dashboard', label: 'Dashboard', icon: '⊞' },
+            { id: 'dashboard', label: 'Command View', icon: '⊞' },
             { id: 'incidents', label: 'Incidents', icon: '⚠' },
-            { id: 'units', label: 'Units', icon: '🔲' },
-            { id: 'analytics', label: 'Analytics', icon: '📊' },
+            { id: 'units', label: 'Units & Resources', icon: '◈' },
+            { id: 'analytics', label: 'Analytics', icon: '▦' },
             { id: 'ai', label: 'AI Assistant', icon: '◆' },
           ].map(({ id, label, icon }) => (
             <li key={id}>

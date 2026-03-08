@@ -2,9 +2,10 @@ import { useState, FormEvent } from 'react';
 
 interface Props {
   onLogin: (username: string, password: string) => Promise<void>;
+  onBack?: () => void;
 }
 
-export function LoginPage({ onLogin }: Props) {
+export function LoginPage({ onLogin, onBack }: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,9 +27,14 @@ export function LoginPage({ onLogin }: Props) {
   return (
     <div className="login-page">
       <div className="login-card">
+        {onBack && (
+          <button className="back-btn" onClick={onBack} type="button">
+            &larr; Back
+          </button>
+        )}
         <div className="login-header">
           <h1>First Responder Analytics</h1>
-          <p>City Emergency Services Intelligence Platform</p>
+          <p>City of Pensacola — Emergency Services Platform</p>
         </div>
         <form onSubmit={handleSubmit}>
           {error && <div className="error-msg">{error}</div>}

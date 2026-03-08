@@ -20,12 +20,12 @@ async function seed() {
         // DISTRICTS
         // ============================================================
         const districts = [
-            { id: districtIds[0], name: 'Downtown', num: 1, pop: 45000, area: 3.2, risk: 'high' },
-            { id: districtIds[1], name: 'Northside', num: 2, pop: 62000, area: 8.5, risk: 'moderate' },
-            { id: districtIds[2], name: 'Southside', num: 3, pop: 38000, area: 5.1, risk: 'high' },
-            { id: districtIds[3], name: 'Eastwood', num: 4, pop: 55000, area: 12.3, risk: 'moderate' },
-            { id: districtIds[4], name: 'West Hills', num: 5, pop: 41000, area: 15.7, risk: 'low' },
-            { id: districtIds[5], name: 'Industrial Park', num: 6, pop: 12000, area: 6.8, risk: 'critical' },
+            { id: districtIds[0], name: 'Downtown Pensacola', num: 1, pop: 28000, area: 3.8, risk: 'high' },
+            { id: districtIds[1], name: 'East Hill', num: 2, pop: 35000, area: 6.2, risk: 'moderate' },
+            { id: districtIds[2], name: 'West Pensacola', num: 3, pop: 42000, area: 8.5, risk: 'moderate' },
+            { id: districtIds[3], name: 'Cordova Park', num: 4, pop: 31000, area: 7.1, risk: 'low' },
+            { id: districtIds[4], name: 'Warrington', num: 5, pop: 24000, area: 9.3, risk: 'high' },
+            { id: districtIds[5], name: 'Perdido / Ferry Pass', num: 6, pop: 38000, area: 14.6, risk: 'moderate' },
         ];
         for (const d of districts) {
             await client.query(`INSERT INTO districts (id, name, district_number, population, area_sq_miles, risk_level)
@@ -35,18 +35,18 @@ async function seed() {
         // STATIONS
         // ============================================================
         const stations = [
-            { id: stationIds[0], num: 1, name: 'Central Station', addr: '100 Main St', lat: 35.7796, lng: -78.6382, dist: 0, hq: true, cap: 6 },
-            { id: stationIds[1], num: 2, name: 'Station 2 - North', addr: '450 Oak Ave', lat: 35.7950, lng: -78.6350, dist: 1, hq: false, cap: 4 },
-            { id: stationIds[2], num: 3, name: 'Station 3 - South', addr: '820 Elm St', lat: 35.7600, lng: -78.6400, dist: 2, hq: false, cap: 4 },
-            { id: stationIds[3], num: 4, name: 'Station 4 - East', addr: '1200 Pine Rd', lat: 35.7750, lng: -78.6100, dist: 3, hq: false, cap: 4 },
-            { id: stationIds[4], num: 5, name: 'Station 5 - West', addr: '600 Maple Dr', lat: 35.7800, lng: -78.6700, dist: 4, hq: false, cap: 4 },
-            { id: stationIds[5], num: 6, name: 'Station 6 - Industrial', addr: '1500 Factory Blvd', lat: 35.7650, lng: -78.6000, dist: 5, hq: false, cap: 5 },
-            { id: stationIds[6], num: 7, name: 'Station 7 - Northgate', addr: '900 Ridge Rd', lat: 35.8100, lng: -78.6250, dist: 1, hq: false, cap: 3 },
-            { id: stationIds[7], num: 8, name: 'Station 8 - Lakeside', addr: '350 Shore Dr', lat: 35.7550, lng: -78.6550, dist: 2, hq: false, cap: 3 },
-            { id: stationIds[8], num: 9, name: 'Station 9 - Commerce', addr: '700 Trade St', lat: 35.7830, lng: -78.6420, dist: 0, hq: false, cap: 4 },
-            { id: stationIds[9], num: 10, name: 'Station 10 - University', addr: '1100 College Blvd', lat: 35.7900, lng: -78.6180, dist: 3, hq: false, cap: 3 },
-            { id: stationIds[10], num: 11, name: 'Station 11 - Airport', addr: '2500 Terminal Dr', lat: 35.7400, lng: -78.5900, dist: 5, hq: false, cap: 4 },
-            { id: stationIds[11], num: 12, name: 'Station 12 - Hillcrest', addr: '800 Summit Ln', lat: 35.7980, lng: -78.6800, dist: 4, hq: false, cap: 3 },
+            { id: stationIds[0], num: 1, name: 'Station 1 - Palafox', addr: '110 S Palafox St', lat: 30.4113, lng: -87.2169, dist: 0, hq: true, cap: 6 },
+            { id: stationIds[1], num: 2, name: 'Station 2 - East Hill', addr: '1900 E Cervantes St', lat: 30.4250, lng: -87.1980, dist: 1, hq: false, cap: 4 },
+            { id: stationIds[2], num: 3, name: 'Station 3 - West Pensacola', addr: '5100 Mobile Hwy', lat: 30.4350, lng: -87.2650, dist: 2, hq: false, cap: 4 },
+            { id: stationIds[3], num: 4, name: 'Station 4 - Cordova', addr: '2900 N 12th Ave', lat: 30.4480, lng: -87.2050, dist: 3, hq: false, cap: 4 },
+            { id: stationIds[4], num: 5, name: 'Station 5 - Warrington', addr: '401 Navy Blvd', lat: 30.3880, lng: -87.2500, dist: 4, hq: false, cap: 4 },
+            { id: stationIds[5], num: 6, name: 'Station 6 - Perdido', addr: '7200 Pine Forest Rd', lat: 30.4600, lng: -87.3100, dist: 5, hq: false, cap: 5 },
+            { id: stationIds[6], num: 7, name: 'Station 7 - Scenic Heights', addr: '3300 Scenic Hwy', lat: 30.4400, lng: -87.1900, dist: 1, hq: false, cap: 3 },
+            { id: stationIds[7], num: 8, name: 'Station 8 - Bayou Chico', addr: '2850 Barrancas Ave', lat: 30.3950, lng: -87.2350, dist: 4, hq: false, cap: 3 },
+            { id: stationIds[8], num: 9, name: 'Station 9 - Downtown South', addr: '500 S Baylen St', lat: 30.4050, lng: -87.2200, dist: 0, hq: false, cap: 4 },
+            { id: stationIds[9], num: 10, name: 'Station 10 - Ensley', addr: '600 N Highway 29', lat: 30.4550, lng: -87.2700, dist: 2, hq: false, cap: 3 },
+            { id: stationIds[10], num: 11, name: 'Station 11 - Airport', addr: '2430 Airport Blvd', lat: 30.4730, lng: -87.1870, dist: 3, hq: false, cap: 4 },
+            { id: stationIds[11], num: 12, name: 'Station 12 - Ferry Pass', addr: '8800 N Davis Hwy', lat: 30.4800, lng: -87.2200, dist: 5, hq: false, cap: 3 },
         ];
         for (const s of stations) {
             await client.query(`INSERT INTO stations (id, station_number, name, address, location_lat, location_lng, district_id, is_headquarters, capacity_units)
@@ -160,14 +160,14 @@ async function seed() {
         // HAZARD LOCATIONS
         // ============================================================
         const hazards = [
-            { name: 'Acme Chemical Plant', type: 'chemical_facility', addr: '1800 Industrial Way', lat: 35.7660, lng: -78.5980, dist: 5, risk: 'critical', instr: 'Full hazmat response required. Upwind approach only. Contact plant safety officer.' },
-            { name: 'Lincoln Elementary School', type: 'school', addr: '200 School Ln', lat: 35.7810, lng: -78.6370, dist: 0, risk: 'high', instr: 'Capacity 800 students. Reunification point at parking lot B.' },
-            { name: 'Metro General Hospital', type: 'hospital', addr: '500 Medical Center Dr', lat: 35.7780, lng: -78.6300, dist: 0, risk: 'high', instr: 'Emergency department entrance on south side. Helipad on roof.' },
-            { name: 'Sunset Nursing Home', type: 'nursing_home', addr: '150 Sunset Blvd', lat: 35.7700, lng: -78.6500, dist: 2, risk: 'high', instr: '120 residents, many non-ambulatory. Evacuation requires multiple units.' },
-            { name: 'Interstate 40 / Highway 1 Interchange', type: 'highway', addr: 'I-40 at Hwy 1', lat: 35.7500, lng: -78.6200, dist: 3, risk: 'moderate', instr: 'High traffic volume. Coordinate with DOT for lane closures.' },
-            { name: 'Regional Airport', type: 'airport', addr: '2500 Terminal Dr', lat: 35.7400, lng: -78.5900, dist: 5, risk: 'critical', instr: 'ARFF on-site. Coordinate with airport fire rescue and FAA.' },
-            { name: 'City Hall Complex', type: 'government_building', addr: '1 Government Plaza', lat: 35.7795, lng: -78.6390, dist: 0, risk: 'moderate', instr: 'Security checkpoint at all entrances. Council chambers on 3rd floor.' },
-            { name: 'Northgate Mall', type: 'high_rise', addr: '950 Mall Dr', lat: 35.8050, lng: -78.6280, dist: 1, risk: 'moderate', instr: 'Weekend capacity 5000+. Multiple anchor stores with separate fire suppression.' },
+            { name: 'NAS Pensacola', type: 'government_building', addr: '190 Radford Blvd', lat: 30.3500, lng: -87.2750, dist: 4, risk: 'critical', instr: 'Military installation. Coordinate with base fire dept. Gate access required. Contact base emergency dispatch.' },
+            { name: 'A.K. Suter Elementary School', type: 'school', addr: '32 W Blount St', lat: 30.4200, lng: -87.2180, dist: 0, risk: 'high', instr: 'Capacity 650 students. Reunification at Bartram Park across the street.' },
+            { name: 'Baptist Hospital', type: 'hospital', addr: '1000 W Moreno St', lat: 30.4080, lng: -87.2280, dist: 0, risk: 'high', instr: 'Level II Trauma Center. ER entrance on Moreno St. Helipad on roof.' },
+            { name: 'Azalea Trace Nursing Facility', type: 'nursing_home', addr: '10100 Hillview Dr', lat: 30.4700, lng: -87.2500, dist: 5, risk: 'high', instr: '280 residents, many non-ambulatory. Full evacuation requires 8+ units and buses.' },
+            { name: 'I-110 / I-10 Interchange', type: 'highway', addr: 'I-110 at I-10', lat: 30.4350, lng: -87.2150, dist: 1, risk: 'moderate', instr: 'High traffic interchange. Coordinate with FDOT and FHP for lane closures.' },
+            { name: 'Pensacola International Airport', type: 'airport', addr: '2430 Airport Blvd', lat: 30.4734, lng: -87.1866, dist: 3, risk: 'critical', instr: 'ARFF on-site. Coordinate with airport fire rescue and FAA tower. Runway 17/35 primary.' },
+            { name: 'Port of Pensacola', type: 'warehouse', addr: '700 S Barracks St', lat: 30.4020, lng: -87.2100, dist: 0, risk: 'moderate', instr: 'Commercial port facility. Cargo containers, fuel storage. Marine unit access from Bayfront.' },
+            { name: 'Ascension Sacred Heart Hospital', type: 'hospital', addr: '5151 N 9th Ave', lat: 30.4600, lng: -87.2050, dist: 3, risk: 'high', instr: 'Level I Trauma Center. ER on east side. Helipad active 24/7. Pediatric unit on 3rd floor.' },
         ];
         for (const h of hazards) {
             await client.query(`INSERT INTO hazard_locations (name, hazard_type, address, location_lat, location_lng, district_id, risk_level, special_instructions)
@@ -200,19 +200,19 @@ async function seed() {
             { type: 'rescue', weight: 1 },
         ];
         const addresses = [
-            '123 Main St', '456 Oak Ave', '789 Elm Rd', '321 Pine Way', '654 Cedar Ln',
-            '987 Birch Dr', '147 Maple Ct', '258 Walnut St', '369 Cherry Blvd', '741 Spruce Ave',
-            '852 Ash St', '963 Poplar Rd', '159 Willow Ln', '357 Sycamore Dr', '486 Hickory Way',
-            '1100 Commerce Blvd', '2200 Market St', '3300 Industrial Dr', '550 Lakefront Ave', '720 University Dr',
+            '220 S Palafox St', '1400 E Cervantes St', '3100 W Navy Blvd', '801 N Pace Blvd', '2500 N 12th Ave',
+            '710 E Gregory St', '4500 Mobile Hwy', '1200 Bayfront Pkwy', '600 S Baylen St', '3400 Scenic Hwy',
+            '900 E Garden St', '5200 N W St', '1800 Creighton Rd', '2100 Airport Blvd', '430 Barrancas Ave',
+            '7500 Pine Forest Rd', '1050 N 9th Ave', '3600 Brent Ln', '2800 N Davis Hwy', '150 E Intendencia St',
         ];
         const descriptions = {
-            ems: ['Chest pain, 65yo male', 'Fall injury, elderly female', 'Difficulty breathing', 'Unresponsive person', 'Allergic reaction', 'Seizure activity', 'Motor vehicle accident with injuries', 'Overdose reported', 'Abdominal pain, pregnant female', 'Laceration with heavy bleeding'],
-            fire: ['Structure fire, single story residential', 'Kitchen fire, 2-story apartment', 'Smoke investigation', 'Vehicle fire on roadway', 'Dumpster fire near structure', 'Electrical fire in commercial building', 'Brush fire approaching structures', 'Fire alarm activation, high-rise'],
-            police: ['Burglary in progress', 'Domestic disturbance', 'Suspicious person', 'Traffic stop', 'Shoplifting', 'Assault reported', 'Noise complaint', 'Welfare check requested', 'Vandalism report', 'Trespassing'],
-            traffic: ['Two-vehicle collision, injuries unknown', 'Single vehicle vs pole', 'Multi-vehicle pileup on I-40', 'Pedestrian struck', 'Hit and run reported'],
-            multi_agency: ['Structure fire with entrapment', 'Hazmat spill at industrial site', 'Active shooter reported', 'Major MVA with multiple casualties', 'Building collapse'],
-            hazmat: ['Chemical spill at plant', 'Gas leak reported', 'Unknown substance in package'],
-            rescue: ['Water rescue at lake', 'Person trapped in elevator', 'Confined space rescue'],
+            ems: ['Chest pain, 65yo male near Palafox', 'Fall injury, elderly female at residence', 'Difficulty breathing, possible heat exhaustion', 'Unresponsive person on Bayfront Pkwy', 'Allergic reaction, bee sting at park', 'Seizure activity at Cordova Mall', 'MVA with injuries on I-110', 'Overdose reported near downtown', 'Abdominal pain, pregnant female', 'Laceration with heavy bleeding at construction site'],
+            fire: ['Structure fire, single story residential on Cervantes', 'Kitchen fire, 2-story apartment on Garden St', 'Smoke investigation near Bayou Texar', 'Vehicle fire on Pensacola Bay Bridge', 'Dumpster fire near Palafox commercial district', 'Electrical fire in warehouse at Port of Pensacola', 'Brush fire near NAS Pensacola perimeter', 'Fire alarm activation, Ascension Sacred Heart'],
+            police: ['Burglary in progress on E Gregory St', 'Domestic disturbance, Warrington area', 'Suspicious person near Seville Quarter', 'Traffic stop on Navy Blvd', 'Shoplifting at Cordova Mall', 'Assault reported on S Palafox', 'Noise complaint, East Hill residential', 'Welfare check requested, elderly resident', 'Vandalism at Pensacola Bay Center', 'Trespassing at Port facility'],
+            traffic: ['Two-vehicle collision on Pace Blvd, injuries unknown', 'Single vehicle vs pole on Mobile Hwy', 'Multi-vehicle pileup on I-10 at Pensacola exit', 'Pedestrian struck on N Davis Hwy', 'Hit and run reported on Airport Blvd'],
+            multi_agency: ['Structure fire with entrapment on W Cervantes', 'Hazmat spill at Port of Pensacola', 'Active threat reported near government complex', 'Major MVA with multiple casualties on I-110', 'Water rescue, boat capsized in Pensacola Bay'],
+            hazmat: ['Chemical spill at industrial facility on Fairfield', 'Gas leak reported on W Garden St', 'Unknown substance in package at federal courthouse'],
+            rescue: ['Water rescue, swimmer in distress at Pensacola Beach', 'Person trapped in elevator at Baptist Hospital', 'Confined space rescue at port facility'],
         };
         function weightedRandom(items) {
             const total = items.reduce((sum, i) => sum + i.weight, 0);
@@ -280,7 +280,7 @@ async function seed() {
                     new Date(createdAt.getTime() + 45000), // dispatched 45s after creation
                     resolvedAt,
                     isClosed ? resolvedAt : null,
-                    JSON.stringify({ temp_f: 40 + Math.floor(Math.random() * 60), conditions: ['clear', 'cloudy', 'rain', 'storm'][Math.floor(Math.random() * 4)] }),
+                    JSON.stringify({ temp_f: 55 + Math.floor(Math.random() * 40), humidity_pct: 60 + Math.floor(Math.random() * 35), conditions: ['clear', 'partly_cloudy', 'humid', 'thunderstorm', 'rain', 'tropical_storm'][Math.floor(Math.random() * 6)] }),
                 ]);
                 // Add unit assignments (1-3 units per incident)
                 const numUnits = iType === 'multi_agency' ? 3 + Math.floor(Math.random() * 3) :
