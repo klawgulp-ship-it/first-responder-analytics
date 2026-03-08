@@ -64,13 +64,19 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Serve React dashboard in production
-app.use(express.static(path.join(__dirname, '../dashboard/dist')));
+const dashboardPath = path.join(__dirname, '../dashboard/dist');
+app.use(express.static(dashboardPath));
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     next();
     return;
   }
-  res.sendFile(path.join(__dirname, '../dashboard/dist/index.html'));
+  const indexPath = path.join(dashboardPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(500).send('Dashboard not built. Run: cd dashboard && npm run build');
+    }
+  });
 });
 
 // Error handler
