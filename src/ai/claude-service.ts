@@ -3,30 +3,43 @@ import { query } from '../db/connection';
 
 const anthropic = new Anthropic();
 
-const SYSTEM_PROMPT = `You are an AI analyst embedded in a First Responder Analytics Platform for a city government.
-You have access to a PostgreSQL database with the following tables:
+const SYSTEM_PROMPT = `You are an AI analyst embedded in a First Responder Analytics Platform for a city government (Pensacola, FL).
+You have access to a PostgreSQL database with the following schema:
 
-TABLES:
-- incidents (id, incident_number, incident_type[fire/ems/police/multi_agency/hazmat/rescue/traffic], priority[1-5], status, location_lat, location_lng, address, district_id, description, response_time_seconds, scene_time_seconds, total_time_seconds, created_at, dispatched_at, resolved_at, weather_conditions)
-- incident_units (incident_id, unit_id, is_primary, dispatched_at, en_route_at, on_scene_at, cleared_at, response_time_seconds)
-- incident_outcomes (incident_id, outcome_type, injuries_civilian, injuries_responder, fatalities, property_damage_estimate, narrative, follow_up_required)
-- units (id, unit_number, unit_type[engine/ladder/ambulance/medic/patrol/swat/hazmat/rescue/battalion_chief/command/helicopter], station_id, status[available/dispatched/on_scene/out_of_service])
-- personnel (id, badge_number, first_name, last_name, rank, unit_id, certifications, status)
-- stations (id, station_number, name, address, location_lat, location_lng, district_id)
-- districts (id, name, district_number, population, risk_level)
-- response_zones (district_id, zone_type, target_response_time_seconds, avg_response_time_seconds)
-- daily_stats (stat_date, district_id, fire_count, ems_count, police_count, total_incidents, avg_response_time_seconds, units_utilized_pct)
-- dispatch_log (incident_id, unit_id, action, timestamp, notes)
-- hazard_locations (name, hazard_type, address, district_id, risk_level, special_instructions)
+TABLES & COLUMNS:
+- incidents (id UUID, incident_number VARCHAR, incident_type incident_type, priority incident_priority, status incident_status, location_lat DECIMAL, location_lng DECIMAL, address VARCHAR, district_id UUID, description TEXT, response_time_seconds INTEGER, scene_time_seconds INTEGER, total_time_seconds INTEGER, created_at TIMESTAMPTZ, dispatched_at TIMESTAMPTZ, resolved_at TIMESTAMPTZ, closed_at TIMESTAMPTZ, weather_conditions JSONB {temp_f, humidity_pct, conditions})
+- incident_units (id UUID, incident_id UUID, unit_id UUID, is_primary BOOLEAN, dispatched_at TIMESTAMPTZ, en_route_at TIMESTAMPTZ, on_scene_at TIMESTAMPTZ, cleared_at TIMESTAMPTZ, response_time_seconds INTEGER, notes TEXT)
+- incident_outcomes (id UUID, incident_id UUID, outcome_type outcome_type, injuries_civilian INTEGER, injuries_responder INTEGER, fatalities INTEGER, property_damage_estimate DECIMAL, narrative TEXT, follow_up_required BOOLEAN)
+- units (id UUID, unit_number VARCHAR, unit_type unit_type, station_id UUID, status unit_status, current_location_lat DECIMAL, current_location_lng DECIMAL)
+- personnel (id UUID, badge_number VARCHAR, first_name VARCHAR, last_name VARCHAR, rank personnel_rank, unit_id UUID, certifications TEXT[], status personnel_status)
+- stations (id UUID, station_number INTEGER, name VARCHAR, address VARCHAR, location_lat DECIMAL, location_lng DECIMAL, district_id UUID)
+- districts (id UUID, name VARCHAR, district_number INTEGER, population INTEGER, risk_level risk_level)
+- response_zones (id UUID, district_id UUID, zone_name VARCHAR, zone_type VARCHAR, target_response_time_seconds INTEGER, avg_response_time_seconds DECIMAL)
+- daily_stats (stat_date DATE, district_id UUID, fire_count INTEGER, ems_count INTEGER, police_count INTEGER, total_incidents INTEGER, avg_response_time_seconds DECIMAL, units_utilized_pct DECIMAL)
+- dispatch_log (incident_id UUID, unit_id UUID, action dispatch_action, timestamp TIMESTAMPTZ, notes TEXT)
+- hazard_locations (name VARCHAR, hazard_type hazard_type, address VARCHAR, district_id UUID, risk_level risk_level, special_instructions TEXT)
 
-IMPORTANT RULES:
-1. When generating SQL, use ONLY read-only SELECT queries. Never generate INSERT, UPDATE, DELETE, DROP, or ALTER.
-2. Always use parameterized-style references where possible.
-3. Format response times in minutes:seconds for readability (e.g., "4:23" not "263 seconds").
-4. When analyzing data, provide actionable insights, not just numbers.
-5. Consider the context of first responder operations — lives depend on this data.
-6. Flag any concerning trends or anomalies immediately.
-7. Use professional, concise language appropriate for fire chiefs and city officials.`;
+ENUM TYPES (use TEXT values, always quote them):
+- incident_type: 'fire', 'ems', 'police', 'multi_agency', 'hazmat', 'rescue', 'traffic'
+- incident_priority: '1', '2', '3', '4', '5' (THESE ARE TEXT ENUM VALUES, NOT INTEGERS — always use e.g. priority = '1' NOT priority = 1)
+- incident_status: 'received', 'dispatched', 'en_route', 'on_scene', 'resolved', 'closed', 'cancelled'
+- unit_type: 'engine', 'ladder', 'ambulance', 'medic', 'patrol', 'detective', 'swat', 'hazmat', 'rescue', 'battalion_chief', 'command', 'helicopter'
+- unit_status: 'available', 'dispatched', 'en_route', 'on_scene', 'returning', 'out_of_service', 'maintenance'
+- personnel_rank: 'firefighter', 'engineer', 'lieutenant', 'captain', 'battalion_chief', 'deputy_chief', 'chief', 'emt', 'paramedic', 'officer', 'sergeant', 'detective', 'commander', 'dispatcher'
+- risk_level: 'low', 'moderate', 'high', 'critical'
+- outcome_type: 'resolved', 'arrest', 'transport_hospital', 'fire_extinguished', 'false_alarm', 'referred', 'no_action_needed', 'ongoing_investigation', 'mutual_aid', 'patient_refused'
+
+CRITICAL SQL RULES:
+1. ONLY generate read-only SELECT or WITH...SELECT queries. Never INSERT, UPDATE, DELETE, DROP, ALTER.
+2. ENUM comparisons: Always cast or quote enum values. Use incidents.priority = '1' NOT priority = 1. Use incidents.incident_type = 'fire' NOT 'FIRE'. Enum values are ALWAYS lowercase.
+3. Do NOT use parameterized placeholders ($1, $2). Write literal values directly in the query.
+4. For date filtering use: created_at >= CURRENT_DATE - INTERVAL '7 days' (not CURRENT_TIMESTAMP).
+5. When using PERCENTILE_CONT, always add a WHERE clause to filter out NULL values first.
+6. Format response times in minutes:seconds for readability (e.g., "4:23" not "263 seconds").
+7. When analyzing data, provide actionable insights, not just numbers.
+8. Consider the context of first responder operations — lives depend on this data.
+9. Flag any concerning trends or anomalies immediately.
+10. Use professional, concise language appropriate for fire chiefs and city officials.`;
 
 interface AnalysisResult {
   analysis: string;
@@ -35,43 +48,50 @@ interface AnalysisResult {
   suggestions?: string[];
 }
 
-export async function analyzeWithClaude(userQuery: string, context?: string): Promise<AnalysisResult> {
-  // First, ask Claude to generate SQL if the query needs data
+async function generateAndExecuteSql(userQuery: string, context?: string, retryError?: string): Promise<{ queryData: unknown; executedSql?: string }> {
+  const retryHint = retryError
+    ? `\n\nIMPORTANT: Your previous SQL query failed with this error: "${retryError}". Fix the SQL. Common issues: enum values must be quoted strings (priority = '1' not 1), enum values are lowercase, and column names must match the schema exactly.`
+    : '';
+
   const sqlResponse = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
-    system: `${SYSTEM_PROMPT}\n\nYour task: Given the user's question, determine if a SQL query is needed. If yes, respond with ONLY the SQL query wrapped in <sql> tags. If no SQL is needed (e.g., general advice), respond with <no_sql>. Only generate SELECT queries.`,
+    system: `${SYSTEM_PROMPT}\n\nYour task: Given the user's question, determine if a SQL query is needed. If yes, respond with ONLY the SQL query wrapped in <sql> tags. If no SQL is needed (e.g., general advice), respond with <no_sql>. Only generate SELECT queries.${retryHint}`,
     messages: [{ role: 'user', content: context ? `Context: ${context}\n\nQuestion: ${userQuery}` : userQuery }],
   });
 
   const sqlText = sqlResponse.content[0].type === 'text' ? sqlResponse.content[0].text : '';
-  let queryData: unknown = null;
-  let executedSql: string | undefined;
 
-  // Extract and execute SQL if present
   const sqlMatch = sqlText.match(/<sql>([\s\S]*?)<\/sql>/);
-  if (sqlMatch) {
-    const sql = sqlMatch[1].trim();
-
-    // Safety check: only allow SELECT
-    const normalized = sql.toUpperCase().trim();
-    if (!normalized.startsWith('SELECT') && !normalized.startsWith('WITH')) {
-      return {
-        analysis: 'Query blocked: Only read-only SELECT queries are permitted.',
-        suggestions: ['Please rephrase your question as a data retrieval request.'],
-      };
-    }
-
-    try {
-      const result = await query(sql);
-      queryData = result.rows;
-      executedSql = sql;
-    } catch (err) {
-      const errMessage = err instanceof Error ? err.message : 'Unknown error';
-      // If SQL fails, let Claude know and continue with analysis
-      queryData = { error: `Query failed: ${errMessage}` };
-    }
+  if (!sqlMatch) {
+    return { queryData: null };
   }
+
+  const sql = sqlMatch[1].trim();
+
+  // Safety check: only allow SELECT/WITH
+  const normalized = sql.toUpperCase().trim();
+  if (!normalized.startsWith('SELECT') && !normalized.startsWith('WITH')) {
+    return { queryData: { error: 'Query blocked: Only read-only SELECT queries are permitted.' } };
+  }
+
+  try {
+    const result = await query(sql);
+    return { queryData: result.rows, executedSql: sql };
+  } catch (err) {
+    const errMessage = err instanceof Error ? err.message : 'Unknown error';
+    // On first attempt, retry with the error message so Claude can fix the SQL
+    if (!retryError) {
+      console.warn('SQL failed, retrying with error hint:', errMessage);
+      return generateAndExecuteSql(userQuery, context, errMessage);
+    }
+    // Second failure — give up and pass error to analysis
+    return { queryData: { error: `Query failed: ${errMessage}` } };
+  }
+}
+
+export async function analyzeWithClaude(userQuery: string, context?: string): Promise<AnalysisResult> {
+  const { queryData, executedSql } = await generateAndExecuteSql(userQuery, context);
 
   // Now get Claude's analysis of the data
   const analysisPrompt = queryData
@@ -87,7 +107,6 @@ export async function analyzeWithClaude(userQuery: string, context?: string): Pr
 
   const analysis = analysisResponse.content[0].type === 'text' ? analysisResponse.content[0].text : '';
 
-  // Extract suggestions if Claude included them
   const suggestions: string[] = [];
   const suggestionMatches = analysis.match(/(?:recommend|suggest|consider|should).*?[.!]/gi);
   if (suggestionMatches) {
@@ -301,18 +320,26 @@ export async function optimizeResponseTimes(districtId?: string): Promise<Analys
 
   const [currentPerf, unitPositions, coverageGaps] = await Promise.all([
     query(`
+      WITH unit_calls AS (
+        SELECT iu.unit_id,
+               COUNT(*) as calls_30d,
+               AVG(iu.response_time_seconds) as avg_response,
+               PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY iu.response_time_seconds) as p90_response
+        FROM incident_units iu
+        ${districtFilter ? `JOIN incidents i ON i.id = iu.incident_id ${districtFilter}` : ''}
+        WHERE iu.dispatched_at >= CURRENT_DATE - INTERVAL '30 days'
+          AND iu.response_time_seconds IS NOT NULL
+        GROUP BY iu.unit_id
+      )
       SELECT d.name as district, s.name as station, u.unit_number, u.unit_type,
-             COUNT(iu.id) as calls_30d,
-             AVG(iu.response_time_seconds) as avg_response,
-             PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY iu.response_time_seconds) as p90_response
+             COALESCE(uc.calls_30d, 0) as calls_30d,
+             uc.avg_response,
+             uc.p90_response
       FROM units u
       JOIN stations s ON s.id = u.station_id
       JOIN districts d ON d.id = s.district_id
-      LEFT JOIN incident_units iu ON iu.unit_id = u.id
-        AND iu.dispatched_at >= CURRENT_DATE - INTERVAL '30 days'
-      LEFT JOIN incidents i ON i.id = iu.incident_id ${districtFilter}
-      GROUP BY d.name, s.name, u.unit_number, u.unit_type
-      ORDER BY avg_response DESC NULLS LAST
+      LEFT JOIN unit_calls uc ON uc.unit_id = u.id
+      ORDER BY uc.avg_response DESC NULLS LAST
     `, params),
 
     query(`
