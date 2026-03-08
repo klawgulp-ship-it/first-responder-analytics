@@ -45,12 +45,65 @@ function OverviewDashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // AI Query state — right on the command dashboard
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiResult, setAiResult] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Shift report state
+  const [shiftReport, setShiftReport] = useState<any>(null);
+  const [shiftLoading, setShiftLoading] = useState(false);
+
+  // Predictive staffing state
+  const [prediction, setPrediction] = useState<any>(null);
+  const [predictionLoading, setPredictionLoading] = useState(false);
+
   useEffect(() => {
     api.getDashboard()
       .then((res) => setData(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  const handleAiQuery = async (q?: string) => {
+    const question = q || aiQuery;
+    if (!question.trim() || aiLoading) return;
+    setAiQuery('');
+    setAiLoading(true);
+    setAiResult(null);
+    try {
+      const res = await api.aiQuery(question);
+      setAiResult({ query: question, ...res.data });
+    } catch (err: any) {
+      setAiResult({ query: question, analysis: 'Query failed: ' + (err.message || 'Unknown error'), error: true });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleShiftReport = async () => {
+    setShiftLoading(true);
+    try {
+      const res = await api.aiReport('daily');
+      setShiftReport(res.data);
+    } catch (err: any) {
+      setShiftReport({ analysis: 'Report generation failed: ' + err.message, error: true });
+    } finally {
+      setShiftLoading(false);
+    }
+  };
+
+  const handlePrediction = async () => {
+    setPredictionLoading(true);
+    try {
+      const res = await api.aiPredict();
+      setPrediction(res.data);
+    } catch (err: any) {
+      setPrediction({ analysis: 'Prediction failed: ' + err.message, error: true });
+    } finally {
+      setPredictionLoading(false);
+    }
+  };
 
   if (loading) return <div className="loading">Loading dashboard...</div>;
   if (!data) return <div className="error">Failed to load dashboard</div>;
@@ -66,9 +119,69 @@ function OverviewDashboard() {
     count: count as number,
   }));
 
+  const SUGGESTED_QUERIES = [
+    "What's our average response time this week?",
+    "Which district needs more coverage on weekends?",
+    "Show me incident trends for the last 90 days",
+    "Show me all structure fires last month with response times over 6 minutes",
+    "What's our busiest time for EMS calls?",
+    "Which units are responding to the most calls this month?",
+  ];
+
   return (
     <div className="dashboard-page">
       <h2>Command Dashboard</h2>
+
+      {/* ============================================================
+          AI QUERY BOX — THE KILLER FEATURE, FRONT AND CENTER
+          ============================================================ */}
+      <div className="ai-query-hero">
+        <div className="ai-query-header">
+          <span className="ai-badge">AI-POWERED</span>
+          <h3>Ask Anything About Your Operations</h3>
+        </div>
+        <div className="ai-query-input-row">
+          <input
+            type="text"
+            value={aiQuery}
+            onChange={(e) => setAiQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAiQuery()}
+            placeholder='Try: "Show me all structure fires last month with response times over 6 minutes"'
+            disabled={aiLoading}
+          />
+          <button onClick={() => handleAiQuery()} disabled={aiLoading || !aiQuery.trim()}>
+            {aiLoading ? 'Analyzing...' : 'Ask AI'}
+          </button>
+        </div>
+        <div className="ai-suggestions-row">
+          {SUGGESTED_QUERIES.map((q, i) => (
+            <button key={i} className="ai-suggestion-chip" onClick={() => handleAiQuery(q)}>
+              {q}
+            </button>
+          ))}
+        </div>
+        {aiLoading && (
+          <div className="ai-result-box">
+            <div className="ai-result-loading">Claude is analyzing your data...</div>
+          </div>
+        )}
+        {aiResult && !aiLoading && (
+          <div className={`ai-result-box ${aiResult.error ? 'error' : ''}`}>
+            <div className="ai-result-query">Q: {aiResult.query}</div>
+            <div className="ai-result-content">
+              {aiResult.analysis?.split('\n').map((line: string, i: number) => (
+                <p key={i}>{line}</p>
+              ))}
+            </div>
+            {aiResult.sqlExecuted && (
+              <details className="ai-sql-details">
+                <summary>View SQL Query</summary>
+                <pre>{aiResult.sqlExecuted}</pre>
+              </details>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* KPI Cards */}
       <div className="kpi-grid">
@@ -87,6 +200,63 @@ function OverviewDashboard() {
         <div className="kpi-card orange">
           <div className="kpi-value">{data.incidentsToday}</div>
           <div className="kpi-label">Incidents Today</div>
+        </div>
+      </div>
+
+      {/* AI Action Cards Row */}
+      <div className="charts-row">
+        <div className="chart-card ai-action-card">
+          <div className="ai-action-header">
+            <h3>Shift Report</h3>
+            <button
+              className="ai-action-btn"
+              onClick={handleShiftReport}
+              disabled={shiftLoading}
+            >
+              {shiftLoading ? 'Generating...' : 'Generate Report'}
+            </button>
+          </div>
+          <p className="ai-action-desc">
+            One-click AI-generated shift summary. Key metrics, incidents handled,
+            anomalies flagged, and recommendations — no manual writing required.
+          </p>
+          {shiftReport && (
+            <div className="ai-action-result">
+              {shiftReport.analysis?.split('\n').slice(0, 20).map((line: string, i: number) => (
+                <p key={i}>{line}</p>
+              ))}
+              {shiftReport.analysis?.split('\n').length > 20 && (
+                <p className="ai-result-truncated">... view full report in AI Assistant</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="chart-card ai-action-card">
+          <div className="ai-action-header">
+            <h3>Predictive Staffing</h3>
+            <button
+              className="ai-action-btn"
+              onClick={handlePrediction}
+              disabled={predictionLoading}
+            >
+              {predictionLoading ? 'Analyzing...' : 'Predict Tomorrow'}
+            </button>
+          </div>
+          <p className="ai-action-desc">
+            AI analyzes 90 days of historical patterns to predict tomorrow's
+            incident volume and recommend staffing levels by district and hour.
+          </p>
+          {prediction && (
+            <div className="ai-action-result">
+              {prediction.analysis?.split('\n').slice(0, 20).map((line: string, i: number) => (
+                <p key={i}>{line}</p>
+              ))}
+              {prediction.analysis?.split('\n').length > 20 && (
+                <p className="ai-result-truncated">... view full analysis in AI Assistant</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -593,11 +763,13 @@ function AiAssistantPage() {
       {/* Suggested Queries */}
       <div className="suggested-queries">
         {[
-          'Show me all structure fires in District 1 last month with response times over 8 minutes',
-          'What is our busiest time for EMS calls on weekends?',
-          'Which units have the slowest response times this month?',
+          "What's our average response time this week?",
+          'Which district needs more coverage on weekends?',
+          'Show me incident trends for the last 90 days',
+          'Show me all structure fires last month with response times over 6 minutes',
+          "What's our busiest time for EMS calls?",
+          'Which units are responding to the most calls this month?',
           'Are there any districts consistently missing response time targets?',
-          'Compare this week\'s incident volume to last week',
         ].map((q) => (
           <button key={q} className="suggestion" onClick={() => { setQuery(q); }}>
             {q}

@@ -169,6 +169,46 @@ export function LandingPage({ onNavigateToLogin }: Props) {
         </div>
       </section>
 
+      {/* Why Us */}
+      <section className="landing-why-us">
+        <div className="section-inner">
+          <h2>Why Choose FRA?</h2>
+          <p className="section-subtitle">Enterprise-grade analytics without the enterprise price tag or timeline</p>
+          <div className="why-us-grid">
+            <div className="why-us-item">
+              <div className="why-us-icon">&#9889;</div>
+              <h3>Deploys in Days, Not Months</h3>
+              <p>Unlike Mark43 or Axon, which require 6-12 month implementation cycles, FRA deploys in under a week with your existing data.</p>
+            </div>
+            <div className="why-us-item">
+              <div className="why-us-icon">&#9878;</div>
+              <h3>Fraction of the Cost</h3>
+              <p>Enterprise platforms like First Due and ImageTrend charge $50K-$500K+ annually. FRA delivers the same insights at a fraction of the price.</p>
+            </div>
+            <div className="why-us-item">
+              <div className="why-us-icon">&#9672;</div>
+              <h3>Natural Language AI</h3>
+              <p>No complex report builders or SQL knowledge required. Ask questions in plain English and get instant, actionable answers.</p>
+            </div>
+            <div className="why-us-item">
+              <div className="why-us-icon">&#9733;</div>
+              <h3>Built for Your Department</h3>
+              <p>Designed for small-to-mid size departments that need real analytics but can't justify enterprise platform costs.</p>
+            </div>
+            <div className="why-us-item">
+              <div className="why-us-icon">&#10003;</div>
+              <h3>No Long-Term Contracts</h3>
+              <p>Month-to-month pricing with no lock-in. We earn your business every month — not through contractual obligations.</p>
+            </div>
+            <div className="why-us-item">
+              <div className="why-us-icon">&#9881;</div>
+              <h3>Continuous Innovation</h3>
+              <p>Powered by cutting-edge AI that improves constantly. New features and capabilities added regularly at no extra cost.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="landing-cta">
         <div className="cta-inner">
