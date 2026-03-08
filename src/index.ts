@@ -17,6 +17,9 @@ import aiRoutes from './api/routes/ai';
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001');
 
+// Trust proxy (Railway, Render, etc.)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false, // Disabled for dashboard SPA
