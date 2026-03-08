@@ -7,11 +7,20 @@ import './styles.css';
 
 type View = 'landing' | 'login' | 'dashboard';
 
+const NAV_ITEMS = [
+  { id: 'dashboard', label: 'Command View', icon: '⊞' },
+  { id: 'incidents', label: 'Incidents', icon: '⚠' },
+  { id: 'units', label: 'Units & Resources', icon: '◈' },
+  { id: 'analytics', label: 'Analytics', icon: '▦' },
+  { id: 'ai', label: 'AI Assistant', icon: '◆' },
+];
+
 export default function App() {
   const [authenticated, setAuthenticated] = useState(api.isAuthenticated());
   const [user, setUser] = useState<any>(null);
   const [view, setView] = useState<View>(api.isAuthenticated() ? 'dashboard' : 'landing');
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogin = useCallback(async (username: string, password: string) => {
     const data = await api.login(username, password);
@@ -27,6 +36,11 @@ export default function App() {
     setView('landing');
   }, []);
 
+  const handleNavClick = (id: string) => {
+    setCurrentPage(id);
+    setSidebarOpen(false);
+  };
+
   if (view === 'landing' && !authenticated) {
     return <LandingPage onNavigateToLogin={() => setView('login')} />;
   }
@@ -37,23 +51,29 @@ export default function App() {
 
   return (
     <div className="app">
-      <nav className="sidebar">
+      {/* Mobile top bar */}
+      <div className="mobile-topbar">
+        <button className="hamburger-btn" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Toggle menu">
+          <span /><span /><span />
+        </button>
+        <span className="mobile-topbar-title">FRA</span>
+        <span className="mobile-topbar-page">{NAV_ITEMS.find(n => n.id === currentPage)?.label}</span>
+      </div>
+
+      {/* Sidebar overlay for mobile */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h1>FRA</h1>
           <p>First Responder Analytics</p>
         </div>
         <ul className="nav-links">
-          {[
-            { id: 'dashboard', label: 'Command View', icon: '⊞' },
-            { id: 'incidents', label: 'Incidents', icon: '⚠' },
-            { id: 'units', label: 'Units & Resources', icon: '◈' },
-            { id: 'analytics', label: 'Analytics', icon: '▦' },
-            { id: 'ai', label: 'AI Assistant', icon: '◆' },
-          ].map(({ id, label, icon }) => (
+          {NAV_ITEMS.map(({ id, label, icon }) => (
             <li key={id}>
               <button
                 className={`nav-btn ${currentPage === id ? 'active' : ''}`}
-                onClick={() => setCurrentPage(id)}
+                onClick={() => handleNavClick(id)}
               >
                 <span className="nav-icon">{icon}</span>
                 {label}
