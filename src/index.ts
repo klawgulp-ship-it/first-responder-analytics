@@ -47,6 +47,11 @@ app.use('/api/ai/', aiLimiter);
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 
+// Health check
+app.get('/api/health', (_, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -57,15 +62,12 @@ app.use('/api/ai', aiRoutes);
 
 // Serve React dashboard in production
 app.use(express.static(path.join(__dirname, '../dashboard/dist')));
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dashboard/dist/index.html'));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    next();
+    return;
   }
-});
-
-// Health check
-app.get('/api/health', (_, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
+  res.sendFile(path.join(__dirname, '../dashboard/dist/index.html'));
 });
 
 // Error handler

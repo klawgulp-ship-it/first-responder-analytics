@@ -45,18 +45,23 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
       // District performance (last 30 days)
       query(`
+        WITH district_targets AS (
+          SELECT district_id, MIN(target_response_time_seconds) as target
+          FROM response_zones WHERE zone_type = 'primary'
+          GROUP BY district_id
+        )
         SELECT d.id as district_id, d.name as district_name,
                COUNT(i.id) as total_incidents,
                AVG(i.response_time_seconds) as avg_response_time,
-               MIN(rz.target_response_time_seconds) as target_response_time,
+               dt.target as target_response_time,
                ROUND(
-                 COUNT(CASE WHEN i.response_time_seconds <= MIN(rz.target_response_time_seconds) THEN 1 END)::numeric
+                 COUNT(CASE WHEN i.response_time_seconds <= dt.target THEN 1 END)::numeric
                  / NULLIF(COUNT(i.id), 0) * 100, 1
                ) as on_target_pct
         FROM districts d
         LEFT JOIN incidents i ON i.district_id = d.id AND i.created_at >= CURRENT_DATE - INTERVAL '30 days'
-        LEFT JOIN response_zones rz ON rz.district_id = d.id AND rz.zone_type = 'primary'
-        GROUP BY d.id, d.name
+        LEFT JOIN district_targets dt ON dt.district_id = d.id
+        GROUP BY d.id, d.name, d.district_number, dt.target
         ORDER BY d.district_number
       `),
     ]);

@@ -5,7 +5,8 @@
 
 -- Enable extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "postgis";
+-- PostGIS is optional; install via: brew install postgis
+-- CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- ============================================================
 -- ENUM TYPES
